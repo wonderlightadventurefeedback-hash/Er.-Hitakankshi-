@@ -39,7 +39,7 @@
       "id": "entrepreneur",
       "slug": "entrepreneur",
       "title": "Entrepreneur",
-      "route": "entrepreneur/",
+      "route": "/entrepreneur/",
       "subtitle": "Ventures, mobility & tech companies",
       "bullets": [
         "Wonderlight Adventure — wonderlightadventure.com",
@@ -54,7 +54,7 @@
       "id": "ai-prompt-engineer",
       "slug": "ai-prompt-engineer",
       "title": "AI Prompt Engineer",
-      "route": "ai-prompt-engineer/",
+      "route": "/ai-prompt-engineer/",
       "subtitle": "Optimizing and steering frontier AI models",
       "bullets": [
         "Advanced prompt architecture & system prompts",
@@ -69,7 +69,7 @@
       "id": "web-developer",
       "slug": "web-developer",
       "title": "Web Developer",
-      "route": "web-developer/",
+      "route": "/web-developer/",
       "subtitle": "Websites, portals & web platforms built end to end",
       "bullets": [
         "Wonderlight Adventure — Flight, hotel & holiday platform",
@@ -84,7 +84,7 @@
       "id": "deep-researcher",
       "slug": "deep-researcher",
       "title": "Deep Researcher",
-      "route": "deep-researcher/",
+      "route": "/deep-researcher/",
       "subtitle": "Rigorous investigation, synthesis and insight",
       "bullets": [
         "Literature review & deep market analysis",

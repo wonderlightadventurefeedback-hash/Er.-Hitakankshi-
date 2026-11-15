@@ -154,8 +154,8 @@ body.ready .line>span{transform:none;opacity:1}
   .hdr__brand-text{font-size:.85rem !important;max-width:175px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
 
-.nav button{display:block}
-.nav button>span{display:inline-flex;align-items:center;gap:.25rem;opacity:.8}
+.nav a, .nav button{display:block;color:inherit;text-decoration:none}
+.nav a>span, .nav button>span{display:inline-flex;align-items:center;gap:.25rem;opacity:.8}
 .caret{font-size:.75rem;opacity:.6}
 .hdr__right{display:flex;align-items:center;gap:.75rem}
 .chip{border:1px solid var(--chip-line);background:var(--chip-bg);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);border-radius:var(--radius-control)}
@@ -2099,10 +2099,10 @@ html[data-mode="dark"] .friends-pill {
     <nav aria-label="Primary">
       <ul class="nav">
         <li><button data-go="home" aria-current="page"><span data-h="y 0 -2|o .8 1" data-hs="320 22" data-ht="button">Home</span></button></li>
-        <li><button data-door="0"><span data-h="y 0 -2|o .8 1" data-hs="320 22" data-ht="button">Entrepreneur</span></button></li>
-        <li><button data-door="1"><span data-h="y 0 -2|o .8 1" data-hs="320 22" data-ht="button">AI Prompt  Engineer</span></button></li>
-        <li><button data-door="2"><span data-h="y 0 -2|o .8 1" data-hs="320 22" data-ht="button">Web Developer</span></button></li>
-        <li><button data-door="3"><span data-h="y 0 -2|o .8 1" data-hs="320 22" data-ht="button">Deep Researcher</span></button></li>
+        <li><a href="/entrepreneur/"><span data-h="y 0 -2|o .8 1" data-hs="320 22" data-ht="a">Entrepreneur</span></a></li>
+        <li><a href="/ai-prompt-engineer/"><span data-h="y 0 -2|o .8 1" data-hs="320 22" data-ht="a">AI Prompt Engineer</span></a></li>
+        <li><a href="/web-developer/"><span data-h="y 0 -2|o .8 1" data-hs="320 22" data-ht="a">Web Developer</span></a></li>
+        <li><a href="/deep-researcher/"><span data-h="y 0 -2|o .8 1" data-hs="320 22" data-ht="a">Deep Researcher</span></a></li>
       </ul>
     </nav>
     <div class="hdr__right">
@@ -2201,7 +2201,7 @@ html[data-mode="dark"] .friends-pill {
               <span class="spill"></span>
               <span class="door">
                 <span class="door__flute"></span>
-                <span class="plate">Web Developer</span>
+                <span class="plate">Entrepreneur</span>
                 <span class="handle"><span class="handle__lever"></span><span class="handle__lock"></span></span>
                 <span class="door__shade"></span>
                 <span class="leak"></span>
@@ -2399,10 +2399,10 @@ html[data-mode="dark"] .friends-pill {
     </div>
     <div class="sf__cols">
       <div><h3>Work</h3><ul class="work">
-  <li><a href="entrepreneur/" data-door="0">Entrepreneur</a></li>
-  <li><a href="ai-prompt-engineer/" data-door="1">AI Prompt Engineer</a></li>
-  <li><a href="web-developer/" data-door="2">Web Developer</a></li>
-  <li><a href="deep-researcher/" data-door="3">Deep Researcher</a></li>
+  <li><a href="/entrepreneur/">Entrepreneur</a></li>
+  <li><a href="/ai-prompt-engineer/">AI Prompt Engineer</a></li>
+  <li><a href="/web-developer/">Web Developer</a></li>
+  <li><a href="/deep-researcher/">Deep Researcher</a></li>
 </ul></div>
       <div><h3>Navigate</h3><ul><li><a href="./" data-go="home">Home</a></li><li><a href="./#about" data-go="about">My story</a></li><li><button data-contact>Get in touch</button></li></ul></div>
       <div class="sf__social">
@@ -2773,7 +2773,7 @@ function closeLayer(el, after){
   setTimeout(() => { el.hidden = true; el.classList.remove('closing'); startScroll(); after?.(); }, 460);
 }
 // nav menu
-const NAV = [['Home','home'],['Entrepreneur',0],['AI Prompt Engineer',1],['Web Developer',2],['Deep Researcher',3],['My story','about'],['Get in touch',null]];
+const NAV = [['Home','home'],['Entrepreneur','/entrepreneur/'],['AI Prompt Engineer','/ai-prompt-engineer/'],['Web Developer','/web-developer/'],['Deep Researcher','/deep-researcher/'],['My story','about'],['Get in touch',null]];
 const navm = $('#navm');
 $('#navList').innerHTML = NAV.map(([l, id], i) =>
   `<li><button class="navm__item" style="--d:${i * 45 + 80}ms" data-i="${i}"><small>0${i + 1}</small><span>${l}</span></button></li>`).join('');
@@ -2784,7 +2784,15 @@ $('#navClose').addEventListener('click', closeNav);
 $('#navList').addEventListener('click', e => {
   const b = e.target.closest('.navm__item'); if (!b) return;
   const id = NAV[+b.dataset.i][1];
-  closeNav(() => typeof id === 'number' ? window.openDoor?.(id) : id ? scrollToId(id) : openModal());
+  closeNav(() => {
+    if (typeof id === 'string' && id.startsWith('/')) {
+      window.location.href = id;
+    } else if (id) {
+      scrollToId(id);
+    } else {
+      openModal();
+    }
+  });
 });
 $('#navStart').addEventListener('click', () => closeNav());
 // request modal
@@ -3405,8 +3413,10 @@ const toggleMode = () => setMode(getMode() === 'dark' ? 'light' : 'dark');
   // each door is its own page (/photographer etc.)
   const _siteData = (typeof window.getSiteData === 'function') ? window.getSiteData() : null;
       const _doorsData = (_siteData && _siteData.doors) ? _siteData.doors.filter(d => d.active !== false) : null;
-      const ROUTES = _doorsData ? _doorsData.map(d => d.route || (d.slug + '/')) : ['entrepreneur/', 'ai-prompt-engineer/', 'web-developer/', 'deep-researcher/'];
-      const SLUGS = _doorsData ? _doorsData.map(d => d.slug) : ['entrepreneur', 'ai-prompt-engineer', 'web-developer', 'deep-researcher'];
+      const BASE = (location.pathname.endsWith('/') ? location.pathname : location.pathname.replace(/\/[^\/]*$/, '/')).replace(/\/(entrepreneur|ai-prompt-engineer|web-developer|deep-researcher)\/.*$/, '/');
+      const DEFAULT_SLUGS = ['entrepreneur', 'ai-prompt-engineer', 'web-developer', 'deep-researcher'];
+      const SLUGS = _doorsData ? _doorsData.map(d => d.slug) : DEFAULT_SLUGS;
+      const ROUTES = SLUGS.map(s => BASE + s + '/');
   // SLUGS initialized above
   // a link like …#photographer lands at the doors and walks straight through that one
   const HASH_DOOR = SLUGS.indexOf(decodeURIComponent(location.hash.slice(1)));
@@ -3797,7 +3807,7 @@ const toggleMode = () => setMode(getMode() === 'dark' ? 'light' : 'dark');
       if (to === 'contact'){ openModal(); return; }                         // the request form opens right over the room
       const n = to.startsWith('door:') ? +to.slice(5) : -1;
       if (n === cur) return;
-      afterLeave = () => { if (n >= 0) window.openDoor(n); else scrollToId(to === 'about' ? 'about' : 'home'); };
+      afterLeave = () => { if (n >= 0) window.location.href = ROUTES[n]; else scrollToId(to === 'about' ? 'about' : 'home'); };
     } else if (e.data.wall !== 'close') return;
     if (pushed){ pushed = false; history.back(); } else leaveWall();
   });

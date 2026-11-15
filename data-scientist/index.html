@@ -1075,7 +1075,7 @@ lb.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - 
     if (to === 'home') location.href = HOME;
     else if (to === 'about') location.href = HOME + '#about';
     else if (to === 'contact') location.href = HOME + '#contact';
-    else if (to.startsWith('door:')) location.href = HOME + '#' + SLUGS[+to.slice(5)];
+    else if (to.startsWith('door:')) location.href = '../' + SLUGS[+to.slice(5)] + '/';
   };
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-nav]'); if (!b) return;
