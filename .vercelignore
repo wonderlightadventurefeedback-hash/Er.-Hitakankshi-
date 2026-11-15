@@ -1,0 +1,6 @@
+# Files ignored by Vercel deployment
+_old_scraped_backup
+.git
+.gitignore
+.env*.local
+*.log

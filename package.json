@@ -1,0 +1,16 @@
+{
+  "name": "hitakankshi-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portfolio website of Er. Hitakankshi Behera - Entrepreneur, AI Prompt Engineer, Web Developer & Deep Researcher",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "serve": "node server.js",
+    "deploy": "vercel",
+    "deploy:prod": "vercel --prod"
+  },
+  "devDependencies": {
+    "vercel": "^65.16.0"
+  }
+}

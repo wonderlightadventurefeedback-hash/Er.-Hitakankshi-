@@ -1,0 +1,2436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal · Er. Hitakankshi Behera</title>
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="../site-data.js"></script>
+  <style>
+    :root {
+      --bg: #09090b;
+      --card-bg: #121215;
+      --card-border: #222228;
+      --card-hover: #18181d;
+      --accent: #d97736;
+      --accent-glow: rgba(217, 119, 54, 0.25);
+      --accent-dim: #a4552c;
+      --text: #f4f4f5;
+      --text-muted: #9ba1a6;
+      --text-dim: #60646c;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Auth Gate Modal */
+    #authGate {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 9, 11, 0.95);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .auth-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 2.5rem;
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      text-align: center;
+    }
+    .auth-box h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+    .auth-box p {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+    .auth-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      text-align: left;
+    }
+    .auth-input-group input {
+      width: 100%;
+      background: #09090b;
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      font-family: var(--mono);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .auth-input-group input:focus {
+      border-color: var(--accent);
+    }
+
+    /* Header */
+    header.admin-hdr {
+      background: rgba(18, 18, 21, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0.875rem 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .hdr-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+    }
+    .hdr-badge {
+      background: linear-gradient(135deg, var(--accent), #ff9a5b);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .hdr-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .hdr-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--success);
+      background: rgba(16, 185, 129, 0.1);
+      padding: 0.25rem 0.65rem;
+      border-radius: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    .hdr-status::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+    }
+    .hdr-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* Main Container */
+    .admin-layout {
+      display: flex;
+      flex: 1;
+      min-height: calc(100vh - 65px);
+    }
+
+    /* Sidebar */
+    .admin-sidebar {
+      width: 260px;
+      background: var(--card-bg);
+      border-right: 1px solid var(--card-border);
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .nav-category {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.75rem 0.75rem 0.25rem;
+    }
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: var(--card-hover);
+      color: #fff;
+    }
+    .nav-btn.active {
+      background: rgba(217, 119, 54, 0.12);
+      color: var(--accent);
+      border-left: 3px solid var(--accent);
+    }
+    .nav-btn svg {
+      width: 18px;
+      height: 18px;
+      opacity: 0.8;
+    }
+
+    /* Content Area */
+    .admin-content {
+      flex: 1;
+      padding: 2.5rem;
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .tab-pane {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    .tab-pane.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .pane-header {
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 1.25rem;
+    }
+    .pane-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+    .pane-desc {
+      color: var(--text-muted);
+      font-size: 0.9375rem;
+      margin-top: 0.35rem;
+    }
+
+    /* Cards & Forms */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+    label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    input[type="text"],
+    input[type="url"],
+    input[type="password"],
+    input[type="email"],
+    textarea,
+    select {
+      background: #09090b;
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 0.75rem 0.9rem;
+      border-radius: var(--radius-sm);
+      font-family: var(--font);
+      font-size: 0.9375rem;
+      outline: none;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.65rem 1.2rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #ff833b);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(217, 119, 54, 0.4);
+    }
+    .btn-primary:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: #18181b;
+      border-color: var(--card-border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      background: #27272a;
+      color: #fff;
+    }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+    .btn-danger:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+    .btn-success {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+    }
+    .btn-success:hover {
+      background: var(--success);
+      color: #fff;
+    }
+    .btn-sm {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8125rem;
+    }
+
+    /* Item List (Doors / Slides) */
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .item-row {
+      background: #151518;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      transition: all 0.2s;
+    }
+    .item-row:hover {
+      border-color: #383842;
+      background: #19191e;
+    }
+    .item-row.inactive {
+      opacity: 0.55;
+      background: #0f0f11;
+    }
+    .item-thumb {
+      width: 70px;
+      height: 70px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #27272a;
+      border: 1px solid var(--card-border);
+      flex-shrink: 0;
+    }
+    .item-main {
+      flex: 1;
+      min-width: 0;
+    }
+    .item-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .badge {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-active {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-hidden {
+      background: rgba(107, 114, 128, 0.2);
+      color: #9ca3af;
+      border: 1px solid rgba(107, 114, 128, 0.3);
+    }
+    .item-sub {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-url {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      margin-top: 0.2rem;
+    }
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal-window {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-hdr {
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-body {
+      padding: 1.75rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .modal-ftr {
+      padding: 1.25rem 1.75rem;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      background: #0f0f12;
+    }
+
+    /* Image Uploader & Preview */
+    .img-upload-box {
+      border: 2px dashed var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      background: #0d0d10;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .img-upload-box:hover {
+      border-color: var(--accent);
+      background: rgba(217, 119, 54, 0.04);
+    }
+    .img-preview {
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 6px;
+      margin-top: 0.75rem;
+      border: 1px solid var(--card-border);
+      object-fit: contain;
+    }
+
+    /* Toast */
+    #toastContainer {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .toast {
+      background: #18181b;
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 0.85rem 1.25rem;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast.success { border-color: rgba(16, 185, 129, 0.5); }
+    .toast.error { border-color: rgba(239, 68, 68, 0.5); }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Segmented Controls for Sub-tabs */
+    .segmented-control {
+      display: inline-flex;
+      background: #0e0e11;
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--card-border);
+      gap: 4px;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .segmented-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .segmented-btn.active {
+      background: #222228;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 860px) {
+      .admin-layout { flex-direction: column; }
+      .admin-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--card-border); }
+      .admin-content { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Auth Gate -->
+  <div id="authGate">
+    <div class="auth-box">
+      <div style="font-size: 2.2rem; margin-bottom: 0.75rem;">🔒</div>
+      <h2>Portfolio Admin Portal</h2>
+      <p>Enter the security PIN to access the full portfolio controls and customize site content.</p>
+      <div class="auth-input-group">
+        <input type="password" id="authPin" placeholder="Enter PIN (Default: admin123)" autofocus>
+        <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.8125rem;cursor:pointer;">
+          <input type="checkbox" id="rememberAuth" checked style="width:auto;"> Keep me signed in
+        </label>
+        <button class="btn btn-primary" id="authBtn">Unlock Admin Portal</button>
+      </div>
+      <div id="authError" style="color:var(--danger);font-size:0.8125rem;margin-top:0.75rem;display:none;">
+        Incorrect PIN. Please try again.
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="admin-hdr">
+    <div class="hdr-brand">
+      <img src="../logo.png" alt="WA Logo" style="width:34px;height:34px;border-radius:50%;object-fit:cover;box-shadow:0 0 10px rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);">
+      <span class="hdr-badge">Control Hub</span>
+      <span class="hdr-title">Er. Hitakankshi Behera · Admin Portal</span>
+      <span class="hdr-status">Live Connected</span>
+    </div>
+    <div class="hdr-actions">
+      <a href="../" target="_blank" class="btn btn-secondary btn-sm">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+        View Live Site
+      </a>
+      <button class="btn btn-primary btn-sm" id="globalSaveBtn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8"/></svg>
+        Save & Publish
+      </button>
+      <button class="btn btn-secondary btn-sm" id="logoutBtn" title="Lock Admin">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="nav-category">Management</div>
+      <button class="nav-btn active" data-tab="tab-overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard Overview
+      </button>
+      <button class="nav-btn" data-tab="tab-general">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Hero & General Info
+      </button>
+      <button class="nav-btn" data-tab="tab-doors">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M14 12h.01"/></svg>
+        Homepage 3D Doors
+      </button>
+      <button class="nav-btn" data-tab="tab-friends">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Collaborators & Orbit
+      </button>
+      <button class="nav-btn" data-tab="tab-sections">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Work Sections & Slides
+      </button>
+      <button class="nav-btn" data-tab="tab-calendar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Flip Calendar Skills
+      </button>
+      <button class="nav-btn" data-tab="tab-story">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/></svg>
+        My Story & Timeline
+      </button>
+      <button class="nav-btn" data-tab="tab-alltext">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        All Website Text & Copy
+      </button>
+
+      <div class="nav-category" style="margin-top:1rem;">Tools & Sync</div>
+      <button class="nav-btn" data-tab="tab-media">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Image & Asset Uploader
+      </button>
+      <button class="nav-btn" data-tab="tab-backup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export / Backup / Reset
+      </button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-content">
+
+      <!-- TAB 1: OVERVIEW -->
+      <section id="tab-overview" class="tab-pane active">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">Welcome to Your Portfolio Control Hub</h1>
+            <p class="pane-desc">Manage every aspect of your website: text, images, 3D doors, and work slides in real time.</p>
+          </div>
+          <button class="btn btn-primary" onclick="switchTab('tab-sections')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Manage Slides
+          </button>
+        </div>
+
+        <div class="form-grid" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 2rem;">
+          <div class="card" style="padding: 1.25rem;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">3D Doors</div>
+            <div style="font-size: 2.2rem; font-weight: 800; color: #fff; margin-top: 0.25rem;" id="statDoors">4</div>
+            <div style="font-size: 0.8125rem; color: var(--success); margin-top: 0.25rem;">All active & interactive</div>
+          </div>
+          <div class="card" style="padding: 1.25rem;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Collaborators</div>
+            <div style="font-size: 2.2rem; font-weight: 800; color: #fff; margin-top: 0.25rem;" id="statFriends">7</div>
+            <div style="font-size: 0.8125rem; color: var(--accent); margin-top: 0.25rem;">In 3D Orbit Component</div>
+          </div>
+          <div class="card" style="padding: 1.25rem;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Total Slides</div>
+            <div style="font-size: 2.2rem; font-weight: 800; color: #fff; margin-top: 0.25rem;" id="statSlides">19</div>
+            <div style="font-size: 0.8125rem; color: var(--accent); margin-top: 0.25rem;">Across 4 core domains</div>
+          </div>
+          <div class="card" style="padding: 1.25rem;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Flip Calendar</div>
+            <div style="font-size: 2.2rem; font-weight: 800; color: #fff; margin-top: 0.25rem;" id="statSkills">4</div>
+            <div style="font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.25rem;">Custom roles in sequence</div>
+          </div>
+          <div class="card" style="padding: 1.25rem;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Sync Mode</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: #fff; margin-top: 0.55rem;">Instant</div>
+            <div style="font-size: 0.8125rem; color: var(--success); margin-top: 0.25rem;">Local & Cloud Ready</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Quick Action Navigation</h2>
+          <p class="card-desc">Click below to jump directly into editing a section of your portfolio:</p>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <button class="btn btn-secondary" onclick="switchTab('tab-general')">✏️ Edit Name, Bio & CTA</button>
+            <button class="btn btn-secondary" onclick="switchTab('tab-doors')">🚪 Add or Remove 3D Doors</button>
+            <button class="btn btn-secondary" onclick="switchTab('tab-friends')">👥 Manage Collaborators & Orbit</button>
+            <button class="btn btn-secondary" onclick="switchWorkSection('entrepreneur')">🏢 Manage Entrepreneur Ventures</button>
+            <button class="btn btn-secondary" onclick="switchWorkSection('ai_prompt_engineer')">🧠 Manage AI Prompt Engineer Slides</button>
+            <button class="btn btn-secondary" onclick="switchWorkSection('web_developer')">💻 Manage Web Developer Sites</button>
+            <button class="btn btn-secondary" onclick="switchWorkSection('deep_researcher')">🔬 Manage Deep Researcher Work</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: GENERAL & HERO -->
+      <section id="tab-general" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">Hero & General Identity</h1>
+            <p class="pane-desc">Customize your name, hero statement, bio, contact links, and portrait photo.</p>
+          </div>
+          <button class="btn btn-primary" onclick="saveGeneralData()">Save Changes</button>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Profile & Headline</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="ownerName">Display Name</label>
+              <input type="text" id="ownerName">
+            </div>
+            <div class="form-group">
+              <label for="jobTitle">Job Title / Headline</label>
+              <input type="text" id="jobTitle">
+            </div>
+            <div class="form-group">
+              <label for="greeting">Hero Greeting</label>
+              <input type="text" id="greeting">
+            </div>
+            <div class="form-group">
+              <label for="location">Location</label>
+              <input type="text" id="location">
+            </div>
+            <div class="form-group full">
+              <label for="bio">Bio / Statement</label>
+              <textarea id="bio" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Call-to-Action (CTA) & Resume</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="ctaText">Primary Button Label</label>
+              <input type="text" id="ctaText" placeholder="Work With Me">
+            </div>
+            <div class="form-group">
+              <label for="ctaLink">Primary Button Link / Destination</label>
+              <input type="text" id="ctaLink" placeholder="mailto:erhitakankshi.wonderlight@gmail.com">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Hero Portrait Image</h2>
+          <p class="card-desc">Upload a replacement photo for the hero section. Files are automatically formatted and stored.</p>
+          <div class="form-grid">
+            <div>
+              <div class="img-upload-box" onclick="document.getElementById('heroImageInput').click()">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:0.5rem;opacity:0.7;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <div style="font-weight:600;">Click to upload new hero photo</div>
+                <div style="font-size:0.75rem;color:var(--text-dim);margin-top:0.25rem;">PNG, WebP, or JPG</div>
+                <input type="file" id="heroImageInput" accept="image/*" style="display:none;" onchange="handleHeroUpload(event)">
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+              <span style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:0.4rem;">Current Hero Preview</span>
+              <img id="heroImagePreview" class="img-preview" src="../hero_color.webp" alt="Hero Preview">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Website Brand Logo</h2>
+          <p class="card-desc">Official WA monogram logo used across the navbar, mobile drawer, footer, and browser favicon.</p>
+          <div class="form-grid">
+            <div>
+              <div class="img-upload-box" onclick="document.getElementById('brandLogoInput').click()">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:0.5rem;opacity:0.7;"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                <div style="font-weight:600;">Click to upload replacement logo</div>
+                <div style="font-size:0.75rem;color:var(--text-dim);margin-top:0.25rem;">PNG, SVG, or JPG (Square/Circular recommended)</div>
+                <input type="file" id="brandLogoInput" accept="image/*" style="display:none;" onchange="handleLogoUpload(event)">
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+              <span style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:0.4rem;">Current Brand Logo</span>
+              <img id="brandLogoPreview" class="img-preview" src="../logo.png" alt="Brand Logo Preview" style="width:100px;height:100px;border-radius:50%;object-fit:cover;box-shadow:0 0 16px rgba(255,255,255,0.2);border:2px solid var(--accent);">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Social & Contact Links</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="socialEmail">Email Address</label>
+              <input type="email" id="socialEmail">
+            </div>
+            <div class="form-group">
+              <label for="socialLinkedin">LinkedIn URL</label>
+              <input type="url" id="socialLinkedin">
+            </div>
+            <div class="form-group">
+              <label for="socialGithub">GitHub URL</label>
+              <input type="url" id="socialGithub" placeholder="https://github.com/Hitakankshi">
+            </div>
+            <div class="form-group">
+              <label for="socialInstagram">Instagram URL</label>
+              <input type="url" id="socialInstagram" placeholder="https://www.instagram.com/er.hitakankshi/">
+            </div>
+            <div class="form-group">
+              <label for="socialTwitter">Twitter / X URL</label>
+              <input type="url" id="socialTwitter">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: HOMEPAGE 3D DOORS -->
+      <section id="tab-doors" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">Homepage 3D Doors Manager</h1>
+            <p class="pane-desc">Add, remove, customize, or reorder the 3D rotating doors on the homepage.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openDoorModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add New Door
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="item-list" id="doorListContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: COLLABORATORS & ORBIT -->
+      <section id="tab-friends" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">Collaborators & Friends Manager</h1>
+            <p class="pane-desc">Add, edit, reorder, or remove persons orbiting in the "Better Together" 3D component on the homepage.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openFriendModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Collaborator
+          </button>
+        </div>
+
+        <div class="card" style="margin-bottom:1.5rem; background:rgba(217,119,54,0.06); border-color:rgba(217,119,54,0.25);">
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+            <div>
+              <div style="font-weight:700; color:#fff; font-size:1.05rem; display:flex; align-items:center; gap:0.5rem;">
+                <span>🪐</span> <span>"Better Together" Orbit Showcase</span>
+              </div>
+              <p style="font-size:0.875rem; color:var(--text-muted); margin-top:0.25rem;">
+                Manage each collaborator's photo, role, bio, portfolio website, GitHub, LinkedIn, and Instagram. Changes sync live to the homepage in real time!
+              </p>
+            </div>
+            <a href="../#friends" target="_blank" class="btn btn-secondary btn-sm" style="display:inline-flex; align-items:center; gap:0.4rem;">
+              <span>View Live Orbit on Site</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; padding-bottom:0.75rem; border-bottom:1px solid var(--card-border);">
+            <div style="font-weight:700; font-size:1.1rem; color:#fff;">Orbit Members (<span id="friendsCount">0</span>)</div>
+            <span style="font-size:0.8125rem; color:var(--text-muted);">Use ▲ ▼ to adjust orbit positioning</span>
+          </div>
+          <div class="item-list" id="friendsListContainer">
+            <!-- Dynamically populated by renderFriendsList() -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: WORK SECTIONS & SLIDES -->
+      <section id="tab-sections" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">Work Sections & Slide Cards</h1>
+            <p class="pane-desc">Select a domain below to manage its project cards, descriptions, live links, and images.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openSlideModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add New Slide
+          </button>
+        </div>
+
+        <!-- Sub-navigation for work domains -->
+        <div class="segmented-control" id="workDomainTabs">
+          <button class="segmented-btn active" data-section="entrepreneur">1. Entrepreneur</button>
+          <button class="segmented-btn" data-section="ai_prompt_engineer">2. AI Prompt Engineer</button>
+          <button class="segmented-btn" data-section="web_developer">3. Web Developer</button>
+          <button class="segmented-btn" data-section="deep_researcher">4. Deep Researcher</button>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <div>
+              <h2 class="card-title" id="currentSectionTitle">Entrepreneur Ventures</h2>
+              <p class="card-desc" id="currentSectionDesc" style="margin-bottom:0;">Ventures, technology & mobility companies</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="editCurrentSectionHeader()">Edit Heading</button>
+          </div>
+
+          <div class="item-list" id="slidesListContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: FLIP CALENDAR -->
+      <section id="tab-calendar" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">Flip Calendar Skills</h1>
+            <p class="pane-desc">Manage the flipping title widget in the top-left of the homepage.</p>
+          </div>
+          <button class="btn btn-primary" onclick="addCalendarSkill()">Add Role</button>
+        </div>
+
+        <div class="card">
+          <p class="card-desc">These items flip smoothly on the 3D spiral calendar widget (e.g. 01/04, 02/04, etc.):</p>
+          <div class="item-list" id="calendarSkillsContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: MY STORY & TIMELINE -->
+      <section id="tab-story" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">My Story & Timeline</h1>
+            <p class="pane-desc">Edit, add, or customize every chapter and detail of your personal and educational journey.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openStoryModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Story Chapter
+          </button>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Story Section Headings</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="storyEyebrow">Eyebrow Label</label>
+              <input type="text" id="storyEyebrow" placeholder="My story">
+            </div>
+            <div class="form-group">
+              <label for="storyTitle">Main Headline</label>
+              <input type="text" id="storyMainTitle" placeholder="Let's go back in time.">
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="saveStoryHeaders()">Save Headings</button>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Timeline Chapters</h2>
+          <p class="card-desc">These chapters scroll sequentially through your timeline with the retro clock and year counter:</p>
+          <div class="item-list" id="storyListContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: ALL WEBSITE TEXT & COPY -->
+      <section id="tab-alltext" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">All Website Text & Copy</h1>
+            <p class="pane-desc">Modify badges, status tags, door wall titles, and footer callouts across the whole site.</p>
+          </div>
+          <button class="btn btn-primary" onclick="saveAllSiteText()">Save All Text Changes</button>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Status Tags & Availability</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="textStatusTag">Top Status Tag (Hero Top-Left)</label>
+              <input type="text" id="textStatusTag" placeholder="• Jay Jagannath O:O">
+            </div>
+            <div class="form-group">
+              <label for="textAvailability">Availability Badge (Bottom Bar)</label>
+              <input type="text" id="textAvailability" placeholder="AVAILABLE FOR WORK">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">3D Doors Wall Text</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="textDoorsHeading">Wall Big Heading</label>
+              <input type="text" id="textDoorsHeading" placeholder="Magic happens behind the doors">
+            </div>
+            <div class="form-group">
+              <label for="textDoorsHint">Swipe / Interaction Hint</label>
+              <input type="text" id="textDoorsHint" placeholder="Swipe along the wall">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Footer & Contact Banner</h2>
+          <div class="form-grid">
+            <div class="form-group full">
+              <label for="textContactHeading">Footer Callout Heading</label>
+              <input type="text" id="textContactHeading" placeholder="Have an idea or need something built? Let's talk.">
+            </div>
+            <div class="form-group full">
+              <label for="textContactSub">Footer Sub-headline / Guarantee</label>
+              <textarea id="textContactSub" rows="2" placeholder="I'm available for freelance work, consulting and venture collaboration. Replies within 5 hours."></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: MEDIA UPLOADER -->
+      <section id="tab-media" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">Image & Asset Uploader</h1>
+            <p class="pane-desc">Upload project screenshots or images directly and get usable image data.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Upload Image</h2>
+          <p class="card-desc">Drag and drop or select an image to convert to an optimized asset URL.</p>
+          <div class="img-upload-box" onclick="document.getElementById('generalImageUpload').click()">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:0.5rem;opacity:0.6;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            <div style="font-weight:600;font-size:1.1rem;">Click or Drag File to Upload</div>
+            <div style="font-size:0.8125rem;color:var(--text-dim);margin-top:0.35rem;">Supports PNG, JPG, WebP, SVG</div>
+            <input type="file" id="generalImageUpload" accept="image/*" style="display:none;" onchange="handleGeneralUpload(event)">
+          </div>
+        </div>
+
+        <div class="card" id="uploadedPreviewBox" style="display:none;">
+          <h2 class="card-title">Uploaded Asset Preview</h2>
+          <div style="display:flex;gap:1.5rem;align-items:center;">
+            <img id="uploadedPreviewImg" class="img-preview" src="" alt="Uploaded">
+            <div style="flex:1;">
+              <div class="form-group">
+                <label>Asset URL / Base64 Data</label>
+                <input type="text" id="uploadedAssetUrl" readonly>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="copyAssetUrl()">📋 Copy Asset URL</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 7: BACKUP & RESTORE -->
+      <section id="tab-backup" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h1 class="pane-title">Backup, Export & Restore</h1>
+            <p class="pane-desc">Safely backup your full portfolio configuration or reset to factory defaults.</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="card">
+            <h2 class="card-title">Export Site Data</h2>
+            <p class="card-desc">Download your entire website content, doors, and slides as a clean JSON backup file.</p>
+            <button class="btn btn-primary" onclick="window.exportSiteData()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Export JSON Backup
+            </button>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title">Import Site Data</h2>
+            <p class="card-desc">Upload a previously saved JSON configuration file to restore all content.</p>
+            <input type="file" id="importJsonInput" accept=".json" style="display:none;" onchange="handleImportJson(event)">
+            <button class="btn btn-secondary" onclick="document.getElementById('importJsonInput').click()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              Import JSON File
+            </button>
+          </div>
+
+          <div class="card full">
+            <h2 class="card-title" style="color:var(--danger);">Factory Reset</h2>
+            <p class="card-desc">Restore all website contents, doors, and slides to the original default setup.</p>
+            <button class="btn btn-danger" onclick="confirmResetDefaults()">Reset to Factory Defaults</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- DOOR EDIT/ADD MODAL -->
+  <div class="modal-backdrop" id="doorModal">
+    <div class="modal-window">
+      <div class="modal-hdr">
+        <h3 id="doorModalTitle" style="color:#fff;">Edit 3D Door</h3>
+        <button class="btn btn-secondary btn-sm" onclick="closeDoorModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="doorEditIndex" value="-1">
+        <div class="form-group">
+          <label for="doorTitle">Door Title</label>
+          <input type="text" id="doorTitle" placeholder="e.g. Entrepreneur">
+        </div>
+        <div class="form-group">
+          <label for="doorSubtitle">Subtitle / Headline</label>
+          <input type="text" id="doorSubtitle" placeholder="e.g. Ventures, mobility & tech companies">
+        </div>
+        <div class="form-group">
+          <label for="doorRoute">Route / Destination URL</label>
+          <input type="text" id="doorRoute" placeholder="e.g. entrepreneur/">
+        </div>
+        <div class="form-group">
+          <label for="doorBullets">Key Highlights / Bullets (One per line)</label>
+          <textarea id="doorBullets" rows="4" placeholder="Enter key points..."></textarea>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+            <input type="checkbox" id="doorActive" checked style="width:auto;"> Door is active on homepage
+          </label>
+        </div>
+      </div>
+      <div class="modal-ftr">
+        <button class="btn btn-secondary" onclick="closeDoorModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveDoorFromModal()">Save Door</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE EDIT/ADD MODAL -->
+  <div class="modal-backdrop" id="slideModal">
+    <div class="modal-window">
+      <div class="modal-hdr">
+        <h3 id="slideModalTitle" style="color:#fff;">Edit Slide Card</h3>
+        <button class="btn btn-secondary btn-sm" onclick="closeSlideModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="slideEditIndex" value="-1">
+        <div class="form-group">
+          <label for="slideTitle">Project / Company Title</label>
+          <input type="text" id="slideTitle" placeholder="e.g. Wonderlight Adventure">
+        </div>
+        <div class="form-group">
+          <label for="slideCategory">Role / Category Tag</label>
+          <input type="text" id="slideCategory" placeholder="e.g. Travel Company">
+        </div>
+        <div class="form-group">
+          <label for="slideSubtitle">One-Line Headline</label>
+          <input type="text" id="slideSubtitle" placeholder="e.g. Curated expeditions & tours">
+        </div>
+        <div class="form-group">
+          <label for="slideDesc">Detailed Description</label>
+          <textarea id="slideDesc" rows="3"></textarea>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="slideUrl">Live Project URL</label>
+            <input type="url" id="slideUrl" placeholder="https://wonderlightadventure.com">
+          </div>
+          <div class="form-group">
+            <label for="slideUrlLabel">Link Display Text</label>
+            <input type="text" id="slideUrlLabel" placeholder="wonderlightadventure.com">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="slideTags">Tags / Technologies (Comma-separated)</label>
+          <input type="text" id="slideTags" placeholder="Travel Tech, Booking, Founder">
+        </div>
+        <div class="form-group">
+          <label for="slideBullets">Key Highlights / Bullets (One per line)</label>
+          <textarea id="slideBullets" rows="3"></textarea>
+        </div>
+        
+        <!-- Slide Image Upload -->
+        <div class="form-group">
+          <label>Project Screenshot / Image</label>
+          <div class="img-upload-box" onclick="document.getElementById('slideImageInput').click()">
+            <div style="font-weight:600;font-size:0.875rem;">Click to upload image/screenshot</div>
+            <input type="file" id="slideImageInput" accept="image/*" style="display:none;" onchange="handleSlideImageUpload(event)">
+          </div>
+          <div style="text-align:center;margin-top:0.5rem;">
+            <img id="slideImagePreview" class="img-preview" src="" alt="Slide Preview" style="display:none;">
+            <input type="hidden" id="slideImagePath">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+            <input type="checkbox" id="slideActive" checked style="width:auto;"> Active (Visible on live site)
+          </label>
+        </div>
+      </div>
+      <div class="modal-ftr">
+        <button class="btn btn-secondary" onclick="closeSlideModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSlideFromModal()">Save Slide</button>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- STORY CHAPTER MODAL -->
+  <div class="modal-backdrop" id="storyModal">
+    <div class="modal-window">
+      <div class="modal-hdr">
+        <h3 id="storyModalTitle" style="color:#fff;">Edit Story Chapter</h3>
+        <button class="btn btn-secondary btn-sm" onclick="closeStoryModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="storyEditIndex" value="-1">
+        <div class="form-group">
+          <label for="chTitle">Chapter / Role Title</label>
+          <input type="text" id="chTitle" placeholder="e.g. Founder & Start Entrepreneur">
+        </div>
+        <div class="form-group">
+          <label for="chOrg">Organization / Institute / Company</label>
+          <input type="text" id="chOrg" placeholder="e.g. Mind Brain · Bhubaneswar, Odisha">
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="chYear">Year (Digits for 3D Clock)</label>
+            <input type="text" id="chYear" placeholder="2026">
+          </div>
+          <div class="form-group">
+            <label for="chWhen">Date Range / Duration</label>
+            <input type="text" id="chWhen" placeholder="Jun 2026 — Present">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="chBullets">Key Details & Learnings (One per line)</label>
+          <textarea id="chBullets" rows="4" placeholder="Enter key accomplishments..."></textarea>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+            <input type="checkbox" id="chActive" checked style="width:auto;"> Active on timeline
+          </label>
+        </div>
+      </div>
+      <div class="modal-ftr">
+        <button class="btn btn-secondary" onclick="closeStoryModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveStoryFromModal()">Save Chapter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT COLLABORATOR -->
+  <div class="modal-backdrop" id="friendModal">
+    <div class="modal-window">
+      <div class="modal-hdr">
+        <h3 id="friendModalTitle" style="color:#fff;">Add Collaborator</h3>
+        <button class="btn btn-secondary btn-sm" onclick="closeFriendModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="friendEditIndex" value="-1">
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="friendName">Full Name *</label>
+            <input type="text" id="friendName" placeholder="e.g. Ronali Jena" required>
+          </div>
+          <div class="form-group">
+            <label for="friendRole">Role / Title *</label>
+            <input type="text" id="friendRole" placeholder="e.g. Full-Stack Developer" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="friendBio">Short Bio / Description</label>
+          <textarea id="friendBio" rows="2" placeholder="e.g. Building high-throughput web systems, microservices, and modern UI architectures."></textarea>
+        </div>
+
+        <!-- Avatar Photo Upload & URL -->
+        <div class="form-group">
+          <label>Avatar Photo</label>
+          <div style="display:flex; align-items:center; gap:1.25rem; background:#18181d; border:1px solid var(--card-border); padding:1rem; border-radius:var(--radius-sm);">
+            <div style="position:relative; width:72px; height:72px; border-radius:50%; overflow:hidden; border:2px solid var(--accent); flex-shrink:0; background:#222228; display:flex; align-items:center; justify-content:center;">
+              <img id="friendAvatarPreview" src="" alt="Avatar" style="width:100%; height:100%; object-fit:cover; display:none;">
+              <span id="friendAvatarPlaceholder" style="font-size:1.8rem;">👤</span>
+            </div>
+            <div style="flex:1; display:flex; flex-direction:column; gap:0.5rem;">
+              <div style="display:flex; gap:0.5rem; align-items:center;">
+                <label class="btn btn-secondary btn-sm" style="cursor:pointer; margin-bottom:0;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <span>Upload Image</span>
+                  <input type="file" id="friendImageFile" accept="image/*" style="display:none;" onchange="handleFriendImageUpload(event)">
+                </label>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Supports PNG, JPG, WebP</span>
+              </div>
+              <input type="text" id="friendImageUrl" placeholder="Or image path / URL (e.g. components/ronali-jena.jpg)" style="font-size:0.8125rem;" oninput="updateFriendAvatarPreview(this.value)">
+            </div>
+          </div>
+        </div>
+
+        <!-- Links: Portfolio, GitHub, LinkedIn, Instagram -->
+        <div style="font-weight:700; font-size:0.8125rem; color:var(--accent); margin-top:1.5rem; margin-bottom:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">
+          Social & Portfolio Links
+        </div>
+
+        <div class="form-group">
+          <label for="friendPortfolio" style="display:flex; align-items:center; gap:0.4rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M7 7h10v10"/></svg>
+            Portfolio Website URL
+          </label>
+          <input type="url" id="friendPortfolio" placeholder="https://yourportfolio.com or https://github.com/username">
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="friendGithub" style="display:flex; align-items:center; gap:0.4rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>
+              GitHub Profile URL
+            </label>
+            <input type="url" id="friendGithub" placeholder="https://github.com/username">
+          </div>
+          <div class="form-group">
+            <label for="friendLinkedin" style="display:flex; align-items:center; gap:0.4rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76c.97 0 1.76-.79 1.76-1.76s-.79-1.76-1.76-1.76-1.76.79-1.76 1.76.79 1.76 1.76 1.76m1.4 9.74v-8.37H5.06v8.37z"/></svg>
+              LinkedIn Profile URL
+            </label>
+            <input type="url" id="friendLinkedin" placeholder="https://www.linkedin.com/in/username">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="friendInstagram" style="display:flex; align-items:center; gap:0.4rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            Instagram Profile URL
+          </label>
+          <input type="url" id="friendInstagram" placeholder="https://www.instagram.com/username">
+        </div>
+      </div>
+      <div class="modal-ftr">
+        <button class="btn btn-secondary" onclick="closeFriendModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveFriendFromModal()">Save Collaborator</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer"></div>
+
+  <script>
+    // App State
+    let siteData = window.getSiteData();
+    let currentWorkSectionKey = 'entrepreneur';
+    const DEFAULT_PIN = 'admin123';
+
+    // Auth Logic
+    function checkAuth() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('token') === 'admin123' || urlParams.get('auth') === '1') {
+        sessionStorage.setItem('admin_authenticated', 'true');
+      }
+      const isAuth = sessionStorage.getItem('admin_authenticated') === 'true' || localStorage.getItem('admin_authenticated') === 'true';
+      if (isAuth) {
+        document.getElementById('authGate').style.display = 'none';
+        const tabParam = urlParams.get('tab');
+        if (tabParam && document.getElementById(tabParam)) {
+          setTimeout(() => switchTab(tabParam), 50);
+        }
+      } else {
+        document.getElementById('authGate').style.display = 'flex';
+      }
+    }
+
+    document.getElementById('authBtn').addEventListener('click', () => {
+      const pin = document.getElementById('authPin').value.trim();
+      const remember = document.getElementById('rememberAuth').checked;
+      if (pin === DEFAULT_PIN || pin === (siteData.adminPin || DEFAULT_PIN)) {
+        if (remember) {
+          localStorage.setItem('admin_authenticated', 'true');
+        } else {
+          sessionStorage.setItem('admin_authenticated', 'true');
+        }
+        document.getElementById('authGate').style.display = 'none';
+        showToast('Admin Portal Unlocked!', 'success');
+      } else {
+        document.getElementById('authError').style.display = 'block';
+      }
+    });
+
+    document.getElementById('authPin').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') document.getElementById('authBtn').click();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      sessionStorage.removeItem('admin_authenticated');
+      localStorage.removeItem('admin_authenticated');
+      document.getElementById('authGate').style.display = 'flex';
+      document.getElementById('authPin').value = '';
+    });
+
+    // Navigation Tabs
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    function switchTab(tabId) {
+      navButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabId);
+      });
+      tabPanes.forEach(pane => {
+        pane.classList.toggle('active', pane.id === tabId);
+      });
+    }
+
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchTab(btn.dataset.tab);
+      });
+    });
+
+    // Broadcast & Server Persistence Helper
+    function broadcastUpdate(data) {
+      if (typeof fetch === 'function') {
+        fetch('/api/save-site-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        }).catch(err => console.warn('[Admin] Server save error:', err));
+      }
+    }
+
+    // Toast Function
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = type === 'success' ? '✓ ' + message : '⚠️ ' + message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Refresh & Populate UI
+    function initUI() {
+      siteData = window.getSiteData();
+
+      // Stats
+      document.getElementById('statDoors').textContent = siteData.doors.length;
+      let totalSlides = 0;
+      Object.values(siteData.sections).forEach(sec => totalSlides += sec.slides.length);
+      document.getElementById('statSlides').textContent = totalSlides;
+      document.getElementById('statSkills').textContent = siteData.calendarSkills.length;
+      if (document.getElementById('statFriends')) {
+        document.getElementById('statFriends').textContent = (siteData.friends || []).length;
+      }
+      if (document.getElementById('friendsCount')) {
+        document.getElementById('friendsCount').textContent = (siteData.friends || []).length;
+      }
+
+      // General Tab
+      document.getElementById('ownerName').value = siteData.general.ownerName || '';
+      document.getElementById('jobTitle').value = siteData.general.jobTitle || '';
+      document.getElementById('greeting').value = siteData.general.greeting || '';
+      document.getElementById('location').value = siteData.general.location || '';
+      document.getElementById('bio').value = siteData.general.bio || '';
+      document.getElementById('ctaText').value = siteData.general.ctaText || 'Work With Me';
+      document.getElementById('ctaLink').value = siteData.general.ctaLink || 'mailto:erhitakankshi.wonderlight@gmail.com?subject=Work%20Inquiry%20-%20Er.%20Hitakankshi%20Behera';
+      if (siteData.general.heroImageColor) {
+        document.getElementById('heroImagePreview').src = siteData.general.heroImageColor.startsWith('data:') 
+          ? siteData.general.heroImageColor 
+          : '../' + siteData.general.heroImageColor.replace(/^\//, '');
+      }
+      if (siteData.general.logo) {
+        const logoSrc = siteData.general.logo.startsWith('data:') 
+          ? siteData.general.logo 
+          : '../' + siteData.general.logo.replace(/^\//, '');
+        if (document.getElementById('brandLogoPreview')) {
+          document.getElementById('brandLogoPreview').src = logoSrc;
+        }
+      }
+      if (siteData.general.social) {
+        document.getElementById('socialEmail').value = siteData.general.social.email || '';
+        document.getElementById('socialLinkedin').value = siteData.general.social.linkedin || '';
+        document.getElementById('socialGithub').value = siteData.general.social.github || '';
+        if (document.getElementById('socialInstagram')) document.getElementById('socialInstagram').value = siteData.general.social.instagram || '';
+        document.getElementById('socialTwitter').value = siteData.general.social.twitter || '';
+      }
+
+      // Render Lists
+      renderDoorsList();
+      renderFriendsList();
+      renderSlidesList();
+      renderCalendarSkills();
+      renderStoryChapters();
+      populateAllSiteText();
+    }
+
+    // GENERAL INFO SAVE
+    function saveGeneralData() {
+      siteData.general.ownerName = document.getElementById('ownerName').value.trim();
+      siteData.general.jobTitle = document.getElementById('jobTitle').value.trim();
+      siteData.general.greeting = document.getElementById('greeting').value.trim();
+      siteData.general.location = document.getElementById('location').value.trim();
+      siteData.general.bio = document.getElementById('bio').value.trim();
+      siteData.general.ctaText = document.getElementById('ctaText').value.trim() || 'Work With Me';
+      siteData.general.ctaLink = document.getElementById('ctaLink').value.trim() || 'mailto:erhitakankshi.wonderlight@gmail.com?subject=Work%20Inquiry%20-%20Er.%20Hitakankshi%20Behera';
+      siteData.general.social = {
+        email: document.getElementById('socialEmail').value.trim(),
+        linkedin: document.getElementById('socialLinkedin').value.trim(),
+        github: document.getElementById('socialGithub').value.trim(),
+          instagram: document.getElementById('socialInstagram') ? document.getElementById('socialInstagram').value.trim() : '',
+        twitter: document.getElementById('socialTwitter').value.trim()
+      };
+
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      showToast('General settings updated & published!');
+    }
+
+    // HERO IMAGE UPLOAD
+    function handleHeroUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        document.getElementById('heroImagePreview').src = base64;
+        siteData.general.heroImageColor = base64;
+        window.saveSiteData(siteData); broadcastUpdate(siteData);
+        showToast('Hero photo updated successfully!');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // BRAND LOGO UPLOAD
+    function handleLogoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        document.getElementById('brandLogoPreview').src = base64;
+        siteData.general.logo = base64;
+        window.saveSiteData(siteData); broadcastUpdate(siteData);
+        showToast('Brand logo updated successfully!');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // DOORS LIST
+    function renderDoorsList() {
+      const container = document.getElementById('doorListContainer');
+      container.innerHTML = '';
+
+      siteData.doors.forEach((door, idx) => {
+        const row = document.createElement('div');
+        row.className = `item-row ${door.active !== false ? '' : 'inactive'}`;
+        row.innerHTML = `
+          <div style="font-size:1.6rem;opacity:0.8;">🚪</div>
+          <div class="item-main">
+            <div class="item-title">
+              ${door.title}
+              <span class="badge ${door.active !== false ? 'badge-active' : 'badge-hidden'}">
+                ${door.active !== false ? 'Active' : 'Hidden'}
+              </span>
+            </div>
+            <div class="item-sub">${door.subtitle}</div>
+            <div class="item-url">Route: /${door.route || door.slug + '/'}</div>
+          </div>
+          <div class="item-actions">
+            <button class="btn btn-secondary btn-sm" onclick="moveDoor(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
+            <button class="btn btn-secondary btn-sm" onclick="moveDoor(${idx}, 1)" ${idx === siteData.doors.length - 1 ? 'disabled' : ''}>▼</button>
+            <button class="btn btn-secondary btn-sm" onclick="toggleDoorActive(${idx})">
+              ${door.active !== false ? 'Hide' : 'Show'}
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="openDoorModal(${idx})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteDoor(${idx})">Delete</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function toggleDoorActive(idx) {
+      siteData.doors[idx].active = !siteData.doors[idx].active;
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      renderDoorsList();
+      showToast('Door visibility toggled!');
+    }
+
+    function moveDoor(idx, dir) {
+      const targetIdx = idx + dir;
+      if (targetIdx < 0 || targetIdx >= siteData.doors.length) return;
+      const temp = siteData.doors[idx];
+      siteData.doors[idx] = siteData.doors[targetIdx];
+      siteData.doors[targetIdx] = temp;
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      renderDoorsList();
+      showToast('Door order updated!');
+    }
+
+    function deleteDoor(idx) {
+      if (confirm(`Are you sure you want to delete the door "${siteData.doors[idx].title}"?`)) {
+        siteData.doors.splice(idx, 1);
+        window.saveSiteData(siteData); broadcastUpdate(siteData);
+        initUI();
+        showToast('Door deleted.');
+      }
+    }
+
+    function openDoorModal(idx = -1) {
+      document.getElementById('doorEditIndex').value = idx;
+      if (idx >= 0) {
+        const d = siteData.doors[idx];
+        document.getElementById('doorModalTitle').textContent = 'Edit 3D Door';
+        document.getElementById('doorTitle').value = d.title || '';
+        document.getElementById('doorSubtitle').value = d.subtitle || '';
+        document.getElementById('doorRoute').value = d.route || d.slug + '/';
+        document.getElementById('doorBullets').value = (d.bullets || []).join('\n');
+        document.getElementById('doorActive').checked = d.active !== false;
+      } else {
+        document.getElementById('doorModalTitle').textContent = 'Add New 3D Door';
+        document.getElementById('doorTitle').value = '';
+        document.getElementById('doorSubtitle').value = '';
+        document.getElementById('doorRoute').value = '';
+        document.getElementById('doorBullets').value = '';
+        document.getElementById('doorActive').checked = true;
+      }
+      document.getElementById('doorModal').classList.add('open');
+    }
+
+    function closeDoorModal() {
+      document.getElementById('doorModal').classList.remove('open');
+    }
+
+    function saveDoorFromModal() {
+      const idx = parseInt(document.getElementById('doorEditIndex').value, 10);
+      const title = document.getElementById('doorTitle').value.trim();
+      const subtitle = document.getElementById('doorSubtitle').value.trim();
+      const route = document.getElementById('doorRoute').value.trim();
+      const bullets = document.getElementById('doorBullets').value.split('\n').map(b => b.trim()).filter(Boolean);
+      const active = document.getElementById('doorActive').checked;
+
+      if (!title) {
+        alert('Please enter a Door Title');
+        return;
+      }
+
+      const slug = route.replace(/\//g, '') || title.toLowerCase().replace(/\s+/g, '-');
+      const doorObj = {
+        id: slug,
+        slug: slug,
+        title: title,
+        subtitle: subtitle,
+        route: route.endsWith('/') ? route : route + '/',
+        bullets: bullets,
+        active: active
+      };
+
+      if (idx >= 0) {
+        siteData.doors[idx] = doorObj;
+      } else {
+        siteData.doors.push(doorObj);
+      }
+
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      closeDoorModal();
+      initUI();
+      showToast('Door saved & updated on site!');
+    }
+
+    // ================== COLLABORATORS & ORBIT LOGIC ==================
+    function renderFriendsList() {
+      const container = document.getElementById('friendsListContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (!siteData.friends) siteData.friends = [];
+      const count = siteData.friends.length;
+      if (document.getElementById('friendsCount')) document.getElementById('friendsCount').textContent = count;
+      if (document.getElementById('statFriends')) document.getElementById('statFriends').textContent = count;
+
+      if (count === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:3rem 1rem; color:var(--text-muted);">
+            <div style="font-size:2.5rem; margin-bottom:0.5rem;">🪐</div>
+            <div style="font-weight:600; color:#fff; font-size:1.1rem;">No collaborators added yet</div>
+            <p style="font-size:0.875rem; margin-top:0.25rem;">Click "Add Collaborator" above to add team members to your orbit!</p>
+          </div>
+        `;
+        return;
+      }
+
+      siteData.friends.forEach((friend, idx) => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+
+        let avatarSrc = friend.image || '';
+        if (avatarSrc && !avatarSrc.startsWith('data:') && !avatarSrc.startsWith('http')) {
+          avatarSrc = '../' + avatarSrc.replace(/^\//, '');
+        }
+
+        const socials = friend.socials || {};
+        const badges = [];
+        if (friend.portfolio) badges.push(`<a href="${friend.portfolio}" target="_blank" rel="noopener noreferrer" class="badge" style="background:#222;color:#d97736;border:1px solid #d97736;text-decoration:none;">↗ Portfolio</a>`);
+        if (socials.github) badges.push(`<a href="${socials.github}" target="_blank" rel="noopener noreferrer" class="badge" style="background:#24292e;color:#fff;text-decoration:none;">GitHub</a>`);
+        if (socials.linkedin) badges.push(`<a href="${socials.linkedin}" target="_blank" rel="noopener noreferrer" class="badge" style="background:#0a66c2;color:#fff;text-decoration:none;">LinkedIn</a>`);
+        if (socials.instagram) badges.push(`<a href="${socials.instagram}" target="_blank" rel="noopener noreferrer" class="badge" style="background:#e1306c;color:#fff;text-decoration:none;">Instagram</a>`);
+
+        row.innerHTML = `
+          <div style="position:relative; width:64px; height:64px; border-radius:50%; overflow:hidden; border:2px solid var(--accent); flex-shrink:0; background:#222228; display:flex; align-items:center; justify-content:center;">
+            ${avatarSrc ? `<img src="${avatarSrc}" alt="${friend.name || 'Member'}" style="width:100%; height:100%; object-fit:cover;">` : `<span style="font-size:1.8rem;">👤</span>`}
+          </div>
+          <div class="item-main">
+            <div class="item-title" style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+              <span style="font-weight:700; font-size:1.05rem; color:#fff;">${friend.name || 'Unnamed'}</span>
+              <span class="badge badge-active">${friend.role || 'Member'}</span>
+              <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--mono);">Orbit Position 0${idx + 1}</span>
+            </div>
+            <div class="item-sub" style="margin:0.25rem 0 0.5rem 0; color:var(--text-muted); font-size:0.875rem;">${friend.bio || 'No bio provided'}</div>
+            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+              ${badges.join(' ') || '<span style="font-size:0.75rem; color:var(--text-dim);">No social links configured</span>'}
+            </div>
+          </div>
+          <div class="item-actions">
+            <button class="btn btn-secondary btn-sm" onclick="moveFriend(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} title="Move Up in Orbit">▲</button>
+            <button class="btn btn-secondary btn-sm" onclick="moveFriend(${idx}, 1)" ${idx === count - 1 ? 'disabled' : ''} title="Move Down in Orbit">▼</button>
+            <button class="btn btn-secondary btn-sm" onclick="openFriendModal(${idx})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteFriend(${idx})">Delete</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function moveFriend(idx, dir) {
+      const targetIdx = idx + dir;
+      if (targetIdx < 0 || targetIdx >= siteData.friends.length) return;
+      const temp = siteData.friends[idx];
+      siteData.friends[idx] = siteData.friends[targetIdx];
+      siteData.friends[targetIdx] = temp;
+      window.saveSiteData(siteData);
+      broadcastUpdate(siteData);
+      renderFriendsList();
+      showToast('Collaborator orbit order updated!');
+    }
+
+    function deleteFriend(idx) {
+      const friend = siteData.friends[idx];
+      if (confirm(`Are you sure you want to remove "${friend.name}" from the orbit?`)) {
+        siteData.friends.splice(idx, 1);
+        window.saveSiteData(siteData);
+        broadcastUpdate(siteData);
+        renderFriendsList();
+        showToast('Collaborator removed from orbit.');
+      }
+    }
+
+    function updateFriendAvatarPreview(src) {
+      const preview = document.getElementById('friendAvatarPreview');
+      const placeholder = document.getElementById('friendAvatarPlaceholder');
+      if (src && src.trim()) {
+        let finalSrc = src.trim();
+        if (!finalSrc.startsWith('data:') && !finalSrc.startsWith('http')) {
+          finalSrc = '../' + finalSrc.replace(/^\//, '');
+        }
+        preview.src = finalSrc;
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+      } else {
+        preview.src = '';
+        preview.style.display = 'none';
+        placeholder.style.display = 'block';
+      }
+    }
+
+    function handleFriendImageUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        document.getElementById('friendImageUrl').value = base64;
+        updateFriendAvatarPreview(base64);
+        showToast('Photo uploaded for collaborator!');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function openFriendModal(idx = -1) {
+      document.getElementById('friendEditIndex').value = idx;
+      if (idx >= 0) {
+        const f = siteData.friends[idx];
+        document.getElementById('friendModalTitle').textContent = `Edit Collaborator: ${f.name}`;
+        document.getElementById('friendName').value = f.name || '';
+        document.getElementById('friendRole').value = f.role || '';
+        document.getElementById('friendBio').value = f.bio || '';
+        document.getElementById('friendImageUrl').value = f.image || '';
+        updateFriendAvatarPreview(f.image || '');
+
+        document.getElementById('friendPortfolio').value = f.portfolio || '';
+        const socials = f.socials || {};
+        document.getElementById('friendGithub').value = socials.github || '';
+        document.getElementById('friendLinkedin').value = socials.linkedin || '';
+        document.getElementById('friendInstagram').value = socials.instagram || '';
+      } else {
+        document.getElementById('friendModalTitle').textContent = 'Add Collaborator to Orbit';
+        document.getElementById('friendName').value = '';
+        document.getElementById('friendRole').value = '';
+        document.getElementById('friendBio').value = '';
+        document.getElementById('friendImageUrl').value = '';
+        updateFriendAvatarPreview('');
+        document.getElementById('friendPortfolio').value = '';
+        document.getElementById('friendGithub').value = '';
+        document.getElementById('friendLinkedin').value = '';
+        document.getElementById('friendInstagram').value = '';
+      }
+      document.getElementById('friendModal').classList.add('open');
+    }
+
+    function closeFriendModal() {
+      document.getElementById('friendModal').classList.remove('open');
+    }
+
+    function saveFriendFromModal() {
+      const name = document.getElementById('friendName').value.trim();
+      const role = document.getElementById('friendRole').value.trim();
+      if (!name) {
+        alert('Please enter a full name for the collaborator.');
+        return;
+      }
+      if (!role) {
+        alert('Please enter a role / title.');
+        return;
+      }
+
+      const bio = document.getElementById('friendBio').value.trim();
+      const image = document.getElementById('friendImageUrl').value.trim();
+      const portfolio = document.getElementById('friendPortfolio').value.trim();
+      const github = document.getElementById('friendGithub').value.trim();
+      const linkedin = document.getElementById('friendLinkedin').value.trim();
+      const instagram = document.getElementById('friendInstagram').value.trim();
+
+      const friendObj = {
+        name,
+        role,
+        bio,
+        image,
+        portfolio,
+        socials: {
+          github,
+          linkedin,
+          instagram
+        }
+      };
+
+      const idx = parseInt(document.getElementById('friendEditIndex').value, 10);
+      if (!siteData.friends) siteData.friends = [];
+
+      if (idx >= 0 && idx < siteData.friends.length) {
+        siteData.friends[idx] = friendObj;
+      } else {
+        siteData.friends.push(friendObj);
+      }
+
+      window.saveSiteData(siteData);
+      broadcastUpdate(siteData);
+      closeFriendModal();
+      renderFriendsList();
+      showToast(`Collaborator "${name}" saved & live in Orbit!`);
+    }
+
+    // WORK SECTIONS & SLIDES
+    function switchWorkSection(sectionKey) {
+      currentWorkSectionKey = sectionKey;
+      document.querySelectorAll('#workDomainTabs .segmented-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.section === sectionKey);
+      });
+      const sec = siteData.sections[sectionKey];
+      if (sec) {
+        document.getElementById('currentSectionTitle').textContent = sec.title;
+        document.getElementById('currentSectionDesc').textContent = sec.subtitle;
+      }
+      renderSlidesList();
+      switchTab('tab-sections');
+    }
+
+    document.querySelectorAll('#workDomainTabs .segmented-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchWorkSection(btn.dataset.section));
+    });
+
+    function editCurrentSectionHeader() {
+      const sec = siteData.sections[currentWorkSectionKey];
+      const newTitle = prompt('Edit section title:', sec.title);
+      if (newTitle === null) return;
+      const newSubtitle = prompt('Edit section subtitle:', sec.subtitle);
+      if (newSubtitle === null) return;
+      sec.title = newTitle.trim();
+      sec.subtitle = newSubtitle.trim();
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      document.getElementById('currentSectionTitle').textContent = sec.title;
+      document.getElementById('currentSectionDesc').textContent = sec.subtitle;
+      showToast('Section heading updated!');
+    }
+
+    function renderSlidesList() {
+      const container = document.getElementById('slidesListContainer');
+      container.innerHTML = '';
+      const sec = siteData.sections[currentWorkSectionKey];
+      if (!sec || !sec.slides) return;
+
+      sec.slides.forEach((slide, idx) => {
+        const row = document.createElement('div');
+        row.className = `item-row ${slide.active !== false ? '' : 'inactive'}`;
+
+        let imgUrl = slide.image || '';
+        if (imgUrl && !imgUrl.startsWith('data:') && !imgUrl.startsWith('http')) {
+          imgUrl = '../' + imgUrl.replace(/^\//, '');
+          if (currentWorkSectionKey === 'web_developer') imgUrl = '../web-developer/' + slide.image;
+          if (currentWorkSectionKey === 'entrepreneur') imgUrl = '../entrepreneur/' + slide.image;
+          if (currentWorkSectionKey === 'ai_prompt_engineer') imgUrl = '../ai-prompt-engineer/' + slide.image;
+          if (currentWorkSectionKey === 'deep_researcher') imgUrl = '../deep-researcher/' + slide.image;
+        }
+
+        row.innerHTML = `
+          <img class="item-thumb" src="${imgUrl}" onerror="this.src='../favicon.ico'" alt="">
+          <div class="item-main">
+            <div class="item-title">
+              ${slide.title}
+              <span class="badge ${slide.active !== false ? 'badge-active' : 'badge-hidden'}">
+                ${slide.active !== false ? 'Active' : 'Hidden'}
+              </span>
+              <span style="font-size:0.75rem;color:var(--text-dim);font-weight:500;">· ${slide.category || ''}</span>
+            </div>
+            <div class="item-sub">${slide.subtitle || slide.desc || ''}</div>
+            <div class="item-url">${slide.url ? '🔗 ' + (slide.urlLabel || slide.url) : ''}</div>
+          </div>
+          <div class="item-actions">
+            <button class="btn btn-secondary btn-sm" onclick="moveSlide(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
+            <button class="btn btn-secondary btn-sm" onclick="moveSlide(${idx}, 1)" ${idx === sec.slides.length - 1 ? 'disabled' : ''}>▼</button>
+            <button class="btn btn-secondary btn-sm" onclick="toggleSlideActive(${idx})">
+              ${slide.active !== false ? 'Hide' : 'Show'}
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="openSlideModal(${idx})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteSlide(${idx})">Delete</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function toggleSlideActive(idx) {
+      const sec = siteData.sections[currentWorkSectionKey];
+      sec.slides[idx].active = !sec.slides[idx].active;
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      renderSlidesList();
+      showToast('Slide visibility toggled!');
+    }
+
+    function moveSlide(idx, dir) {
+      const sec = siteData.sections[currentWorkSectionKey];
+      const targetIdx = idx + dir;
+      if (targetIdx < 0 || targetIdx >= sec.slides.length) return;
+      const temp = sec.slides[idx];
+      sec.slides[idx] = sec.slides[targetIdx];
+      sec.slides[targetIdx] = temp;
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      renderSlidesList();
+      showToast('Slide order reordered!');
+    }
+
+    function deleteSlide(idx) {
+      const sec = siteData.sections[currentWorkSectionKey];
+      if (confirm(`Delete slide "${sec.slides[idx].title}"?`)) {
+        sec.slides.splice(idx, 1);
+        window.saveSiteData(siteData); broadcastUpdate(siteData);
+        initUI();
+        showToast('Slide deleted.');
+      }
+    }
+
+    function openSlideModal(idx = -1) {
+      const sec = siteData.sections[currentWorkSectionKey];
+      document.getElementById('slideEditIndex').value = idx;
+      if (idx >= 0) {
+        const s = sec.slides[idx];
+        document.getElementById('slideModalTitle').textContent = 'Edit Slide Card';
+        document.getElementById('slideTitle').value = s.title || '';
+        document.getElementById('slideCategory').value = s.category || '';
+        document.getElementById('slideSubtitle').value = s.subtitle || '';
+        document.getElementById('slideDesc').value = s.desc || '';
+        document.getElementById('slideUrl').value = s.url || '';
+        document.getElementById('slideUrlLabel').value = s.urlLabel || '';
+        document.getElementById('slideTags').value = (s.tags || []).join(', ');
+        document.getElementById('slideBullets').value = (s.bullets || []).join('\n');
+        document.getElementById('slideActive').checked = s.active !== false;
+        document.getElementById('slideImagePath').value = s.image || '';
+        if (s.image) {
+          let previewSrc = s.image;
+          if (!previewSrc.startsWith('data:') && !previewSrc.startsWith('http')) {
+            if (currentWorkSectionKey === 'web_developer') previewSrc = '../web-developer/' + s.image;
+            else if (currentWorkSectionKey === 'entrepreneur') previewSrc = '../entrepreneur/' + s.image;
+            else if (currentWorkSectionKey === 'ai_prompt_engineer') previewSrc = '../ai-prompt-engineer/' + s.image;
+            else if (currentWorkSectionKey === 'deep_researcher') previewSrc = '../deep-researcher/' + s.image;
+            else previewSrc = '../' + s.image;
+          }
+          document.getElementById('slideImagePreview').src = previewSrc;
+          document.getElementById('slideImagePreview').style.display = 'inline-block';
+        } else {
+          document.getElementById('slideImagePreview').style.display = 'none';
+        }
+      } else {
+        document.getElementById('slideModalTitle').textContent = `Add New Slide to ${sec.title}`;
+        document.getElementById('slideTitle').value = '';
+        document.getElementById('slideCategory').value = '';
+        document.getElementById('slideSubtitle').value = '';
+        document.getElementById('slideDesc').value = '';
+        document.getElementById('slideUrl').value = '';
+        document.getElementById('slideUrlLabel').value = '';
+        document.getElementById('slideTags').value = '';
+        document.getElementById('slideBullets').value = '';
+        document.getElementById('slideActive').checked = true;
+        document.getElementById('slideImagePath').value = '';
+        document.getElementById('slideImagePreview').style.display = 'none';
+      }
+      document.getElementById('slideModal').classList.add('open');
+    }
+
+    function closeSlideModal() {
+      document.getElementById('slideModal').classList.remove('open');
+    }
+
+    function handleSlideImageUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        document.getElementById('slideImagePreview').src = base64;
+        document.getElementById('slideImagePreview').style.display = 'inline-block';
+        document.getElementById('slideImagePath').value = base64;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function saveSlideFromModal() {
+      const sec = siteData.sections[currentWorkSectionKey];
+      const idx = parseInt(document.getElementById('slideEditIndex').value, 10);
+      const title = document.getElementById('slideTitle').value.trim();
+      if (!title) {
+        alert('Please enter a Slide Title');
+        return;
+      }
+      const category = document.getElementById('slideCategory').value.trim();
+      const subtitle = document.getElementById('slideSubtitle').value.trim();
+      const desc = document.getElementById('slideDesc').value.trim();
+      const url = document.getElementById('slideUrl').value.trim();
+      const urlLabel = document.getElementById('slideUrlLabel').value.trim() || url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      const tags = document.getElementById('slideTags').value.split(',').map(t => t.trim()).filter(Boolean);
+      const bullets = document.getElementById('slideBullets').value.split('\n').map(b => b.trim()).filter(Boolean);
+      const active = document.getElementById('slideActive').checked;
+      const image = document.getElementById('slideImagePath').value || (idx >= 0 ? sec.slides[idx].image : '');
+
+      const slideObj = {
+        id: (idx >= 0 ? sec.slides[idx].id : 'slide-' + Date.now()),
+        title: title,
+        category: category,
+        subtitle: subtitle,
+        desc: desc,
+        url: url,
+        urlLabel: urlLabel,
+        tags: tags,
+        bullets: bullets,
+        image: image,
+        active: active
+      };
+
+      if (idx >= 0) {
+        sec.slides[idx] = slideObj;
+      } else {
+        sec.slides.push(slideObj);
+      }
+
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      closeSlideModal();
+      initUI();
+      showToast('Slide saved & updated!');
+    }
+
+    // CALENDAR SKILLS
+    function renderCalendarSkills() {
+      const container = document.getElementById('calendarSkillsContainer');
+      container.innerHTML = '';
+      siteData.calendarSkills.forEach((skill, idx) => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.innerHTML = `
+          <div style="font-family:var(--mono);font-size:1.1rem;color:var(--accent);width:45px;">
+            ${String(idx + 1).padStart(2, '0')}/${String(siteData.calendarSkills.length).padStart(2, '0')}
+          </div>
+          <div class="item-main">
+            <input type="text" value="${skill}" onchange="updateCalendarSkill(${idx}, this.value)" style="background:transparent;border:none;font-size:1.05rem;font-weight:700;color:#fff;">
+          </div>
+          <div class="item-actions">
+            <button class="btn btn-secondary btn-sm" onclick="moveCalendarSkill(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
+            <button class="btn btn-secondary btn-sm" onclick="moveCalendarSkill(${idx}, 1)" ${idx === siteData.calendarSkills.length - 1 ? 'disabled' : ''}>▼</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteCalendarSkill(${idx})">✕</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function updateCalendarSkill(idx, val) {
+      if (!val.trim()) return;
+      siteData.calendarSkills[idx] = val.trim();
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      showToast('Calendar skill updated!');
+    }
+
+    function addCalendarSkill() {
+      const name = prompt('Enter new role for flip calendar:');
+      if (!name || !name.trim()) return;
+      siteData.calendarSkills.push(name.trim());
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      initUI();
+      showToast('Role added to flip calendar!');
+    }
+
+    function moveCalendarSkill(idx, dir) {
+      const targetIdx = idx + dir;
+      if (targetIdx < 0 || targetIdx >= siteData.calendarSkills.length) return;
+      const temp = siteData.calendarSkills[idx];
+      siteData.calendarSkills[idx] = siteData.calendarSkills[targetIdx];
+      siteData.calendarSkills[targetIdx] = temp;
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      renderCalendarSkills();
+      renderStoryChapters();
+      populateAllSiteText();
+      showToast('Calendar sequence reordered!');
+    }
+
+    function deleteCalendarSkill(idx) {
+      if (confirm('Delete this skill from flip calendar?')) {
+        siteData.calendarSkills.splice(idx, 1);
+        window.saveSiteData(siteData); broadcastUpdate(siteData);
+        initUI();
+        showToast('Skill removed.');
+      }
+    }
+
+    // GENERAL ASSET UPLOAD
+    function handleGeneralUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        document.getElementById('uploadedPreviewImg').src = base64;
+        document.getElementById('uploadedAssetUrl').value = base64;
+        document.getElementById('uploadedPreviewBox').style.display = 'block';
+        showToast('Image uploaded & Base64 generated!');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function copyAssetUrl() {
+      const input = document.getElementById('uploadedAssetUrl');
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      showToast('Asset Base64 copied to clipboard!');
+    }
+
+    // IMPORT JSON
+    function handleImportJson(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        if (window.importSiteData(evt.target.result)) {
+          initUI();
+          showToast('Configuration successfully restored!');
+        } else {
+          alert('Invalid configuration file.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // FACTORY RESET
+    function confirmResetDefaults() {
+      if (confirm('Are you SURE you want to reset all portfolio data to factory defaults? All manual customizations will be restored to original verified state.')) {
+        window.resetSiteData();
+        initUI();
+        showToast('Reset to factory defaults completed.', 'success');
+      }
+    }
+
+    // GLOBAL SAVE BUTTON
+    document.getElementById('globalSaveBtn').addEventListener('click', () => {
+      saveGeneralData();
+      showToast('Everything saved & live across website!', 'success');
+    });
+
+    
+    // ================== STORY CHAPTERS LOGIC ==================
+    function renderStoryChapters() {
+      const container = document.getElementById('storyListContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      if (!siteData.story) siteData.story = { eyebrow: 'My story', title: "Let's go back in time.", chapters: [] };
+      if (!siteData.story.chapters) siteData.story.chapters = [];
+
+      document.getElementById('storyEyebrow').value = siteData.story.eyebrow || 'My story';
+      document.getElementById('storyMainTitle').value = siteData.story.title || "Let's go back in time.";
+
+      siteData.story.chapters.forEach((ch, idx) => {
+        const row = document.createElement('div');
+        row.className = `item-row ${ch.active !== false ? '' : 'inactive'}`;
+        row.innerHTML = `
+          <div style="font-family:var(--mono);font-size:1.15rem;color:var(--accent);font-weight:700;width:55px;">
+            ${ch.year || ''}
+          </div>
+          <div class="item-main">
+            <div class="item-title">
+              ${ch.title || ''}
+              <span class="badge ${ch.active !== false ? 'badge-active' : 'badge-hidden'}">
+                ${ch.active !== false ? 'Active' : 'Hidden'}
+              </span>
+            </div>
+            <div class="item-sub"><b>${ch.org || ''}</b> · ${ch.when || ''}</div>
+            <ul style="margin-top:0.35rem;padding-left:1.2rem;font-size:0.8125rem;color:var(--text-muted);">
+              ${(ch.bullets || []).map(b => `<li>${b}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="item-actions">
+            <button class="btn btn-secondary btn-sm" onclick="moveStory(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
+            <button class="btn btn-secondary btn-sm" onclick="moveStory(${idx}, 1)" ${idx === siteData.story.chapters.length - 1 ? 'disabled' : ''}>▼</button>
+            <button class="btn btn-secondary btn-sm" onclick="toggleStoryActive(${idx})">
+              ${ch.active !== false ? 'Hide' : 'Show'}
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="openStoryModal(${idx})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteStory(${idx})">Delete</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function saveStoryHeaders() {
+      if (!siteData.story) siteData.story = {};
+      siteData.story.eyebrow = document.getElementById('storyEyebrow').value.trim() || 'My story';
+      siteData.story.title = document.getElementById('storyMainTitle').value.trim() || "Let's go back in time.";
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      showToast('Story headings updated!');
+    }
+
+    function toggleStoryActive(idx) {
+      siteData.story.chapters[idx].active = !siteData.story.chapters[idx].active;
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      renderStoryChapters();
+      showToast('Chapter visibility toggled!');
+    }
+
+    function moveStory(idx, dir) {
+      const targetIdx = idx + dir;
+      if (targetIdx < 0 || targetIdx >= siteData.story.chapters.length) return;
+      const temp = siteData.story.chapters[idx];
+      siteData.story.chapters[idx] = siteData.story.chapters[targetIdx];
+      siteData.story.chapters[targetIdx] = temp;
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      renderStoryChapters();
+      showToast('Chapter order updated!');
+    }
+
+    function deleteStory(idx) {
+      if (confirm(`Delete chapter "${siteData.story.chapters[idx].title}"?`)) {
+        siteData.story.chapters.splice(idx, 1);
+        window.saveSiteData(siteData); broadcastUpdate(siteData);
+        renderStoryChapters();
+        showToast('Chapter deleted.');
+      }
+    }
+
+    function openStoryModal(idx = -1) {
+      document.getElementById('storyEditIndex').value = idx;
+      if (idx >= 0) {
+        const c = siteData.story.chapters[idx];
+        document.getElementById('storyModalTitle').textContent = 'Edit Story Chapter';
+        document.getElementById('chTitle').value = c.title || '';
+        document.getElementById('chOrg').value = c.org || '';
+        document.getElementById('chYear').value = c.year || '';
+        document.getElementById('chWhen').value = c.when || '';
+        document.getElementById('chBullets').value = (c.bullets || []).join('\n');
+        document.getElementById('chActive').checked = c.active !== false;
+      } else {
+        document.getElementById('storyModalTitle').textContent = 'Add New Story Chapter';
+        document.getElementById('chTitle').value = '';
+        document.getElementById('chOrg').value = '';
+        document.getElementById('chYear').value = new Date().getFullYear();
+        document.getElementById('chWhen').value = '';
+        document.getElementById('chBullets').value = '';
+        document.getElementById('chActive').checked = true;
+      }
+      document.getElementById('storyModal').classList.add('open');
+    }
+
+    function closeStoryModal() {
+      document.getElementById('storyModal').classList.remove('open');
+    }
+
+    function saveStoryFromModal() {
+      const idx = parseInt(document.getElementById('storyEditIndex').value, 10);
+      const title = document.getElementById('chTitle').value.trim();
+      if (!title) { alert('Please enter Chapter Title'); return; }
+      const org = document.getElementById('chOrg').value.trim();
+      const year = document.getElementById('chYear').value.trim();
+      const when = document.getElementById('chWhen').value.trim();
+      const bullets = document.getElementById('chBullets').value.split('\n').map(b => b.trim()).filter(Boolean);
+      const active = document.getElementById('chActive').checked;
+
+      const chObj = {
+        id: idx >= 0 ? siteData.story.chapters[idx].id : 'story-' + Date.now(),
+        title: title,
+        org: org,
+        year: year,
+        when: when,
+        bullets: bullets,
+        active: active
+      };
+
+      if (!siteData.story) siteData.story = { eyebrow: 'My story', title: "Let's go back in time.", chapters: [] };
+      if (idx >= 0) {
+        siteData.story.chapters[idx] = chObj;
+      } else {
+        siteData.story.chapters.unshift(chObj);
+      }
+
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      closeStoryModal();
+      renderStoryChapters();
+      showToast('Story chapter saved & live!');
+    }
+
+    // ================== ALL SITE TEXT LOGIC ==================
+    function populateAllSiteText() {
+      if (!siteData.siteText) siteData.siteText = {};
+      document.getElementById('textStatusTag').value = siteData.siteText.statusTag || '• Jay Jagannath O:O';
+      document.getElementById('textAvailability').value = siteData.siteText.availability || 'AVAILABLE FOR WORK';
+      document.getElementById('textDoorsHeading').value = siteData.siteText.doorsHeading || 'Magic happens behind the doors';
+      document.getElementById('textDoorsHint').value = siteData.siteText.doorsHint || 'Swipe along the wall';
+      document.getElementById('textContactHeading').value = siteData.siteText.contactHeading || "Have an idea or need something built? Let's talk.";
+      document.getElementById('textContactSub').value = siteData.siteText.contactSub || "I'm available for freelance work, consulting and venture collaboration. Replies within 5 hours.";
+    }
+
+    function saveAllSiteText() {
+      if (!siteData.siteText) siteData.siteText = {};
+      siteData.siteText.statusTag = document.getElementById('textStatusTag').value.trim() || '• Jay Jagannath O:O';
+      siteData.siteText.availability = document.getElementById('textAvailability').value.trim() || 'AVAILABLE FOR WORK';
+      siteData.siteText.doorsHeading = document.getElementById('textDoorsHeading').value.trim() || 'Magic happens behind the doors';
+      siteData.siteText.doorsHint = document.getElementById('textDoorsHint').value.trim() || 'Swipe along the wall';
+      siteData.siteText.contactHeading = document.getElementById('textContactHeading').value.trim() || "Have an idea or need something built? Let's talk.";
+      siteData.siteText.contactSub = document.getElementById('textContactSub').value.trim() || "I'm available for freelance work, consulting and venture collaboration. Replies within 5 hours.";
+
+      window.saveSiteData(siteData); broadcastUpdate(siteData);
+      showToast('All website copy & text updated!');
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      checkAuth();
+      initUI();
+      const urlParams = new URLSearchParams(window.location.search);
+      const initialTab = urlParams.get('tab');
+      if (initialTab && document.getElementById(initialTab)) {
+        switchTab(initialTab);
+      }
+      const initialSection = urlParams.get('section');
+      if (initialSection) {
+        switchWorkSection(initialSection);
+      }
+    });
+  </script>
+</body>
+</html>

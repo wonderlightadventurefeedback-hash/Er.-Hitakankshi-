@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://pabitralenka.in/sitemap.xml
