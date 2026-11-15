@@ -406,12 +406,43 @@ html[data-mode="dark"] .friends-pill {
 }
 
 @media (max-width: 480px) {
+  .friends-section {
+    padding: 3rem 0 3.5rem;
+  }
   .friends-section__orbit-wrap {
-    height: 350px;
+    height: 330px;
+    min-height: 300px;
   }
   .orbit-center-card {
-    width: 270px;
-    padding: 1rem;
+    width: min(295px, 86vw);
+    padding: 0.95rem 1rem;
+  }
+  .orbit-friend-name {
+    font-size: 1.05rem;
+  }
+  .orbit-friend-role {
+    font-size: 0.68rem;
+  }
+  .orbit-friend-bio {
+    font-size: 0.74rem;
+    max-width: 28ch;
+    margin-bottom: 0.65rem;
+  }
+  .orbit-friend-actions {
+    gap: 0.45rem;
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+  .orbit-friend-portfolio {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    flex: 0 1 auto;
+  }
+  .orbit-friend-social {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
   }
 }
 
