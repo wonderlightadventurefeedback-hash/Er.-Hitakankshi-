@@ -1321,6 +1321,318 @@ lb.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - 
 })();
 </script>
 
+<style>
+/* ---------- Slide Controller Component ---------- */
+.slide-controller {
+  position: fixed;
+  bottom: 24px;
+  right: 28px;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: rgba(22, 20, 20, 0.92);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  color: #fff;
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  user-select: none;
+  transition: transform 0.3s cubic-bezier(.16,1,.3,1), opacity 0.3s ease;
+}
+html[data-mode="dark"] .slide-controller {
+  background: rgba(18, 16, 16, 0.94);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+.snav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 10px;
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s, transform 0.2s;
+}
+.snav-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+.snav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+.snav-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+}
+.snav-dots {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 4px;
+}
+.snav-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.32);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(.16,1,.3,1);
+}
+.snav-dot:hover {
+  background: rgba(255, 255, 255, 0.7);
+  transform: scale(1.2);
+}
+.snav-dot.active {
+  background: #fff;
+  transform: scale(1.35);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+.snav-count {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0 6px;
+  white-space: nowrap;
+}
+.snav-count .cur {
+  color: #fff;
+  font-weight: 700;
+}
+.snav-count .total {
+  opacity: 0.55;
+}
+@media (max-width: 767.98px) {
+  .slide-controller {
+    bottom: 16px;
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 12px;
+    gap: 6px;
+    max-width: calc(100vw - 28px);
+  }
+  .snav-btn {
+    height: 30px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
+  .snav-btn span {
+    display: none;
+  }
+  .snav-count {
+    font-size: 11px;
+    padding: 0 4px;
+  }
+}
+</style>
+
+<!-- ============ Subpage Real-time Live Sync & Slide Navigation ============ -->
+<script id="subpage-realtime-sync">
+(function() {
+  const SECTION_KEY = 'deep_researcher';
+
+  function initSlideController() {
+    const worlds = Array.from(document.querySelectorAll('.world'));
+    if (!worlds.length) return;
+
+    const total = worlds.length;
+    let currentIdx = 0;
+    let isNavigating = false;
+
+    function getDockY(idx) {
+      if (idx <= 0) return 0;
+      const w = worlds[idx];
+      if (!w) return 0;
+      const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 64;
+      const docY = w.getBoundingClientRect().top + window.pageYOffset;
+      return Math.max(0, docY - navH);
+    }
+
+    function goToSlide(idx) {
+      if (idx < 0) idx = 0;
+      if (idx >= total) idx = total - 1;
+      currentIdx = idx;
+      isNavigating = true;
+      const targetY = getDockY(idx);
+      window.scrollTo({ top: targetY, behavior: 'smooth' });
+      updateUI();
+      setTimeout(() => { isNavigating = false; }, 850);
+    }
+
+    let nav = document.getElementById('slideController');
+    if (!nav) {
+      nav = document.createElement('nav');
+      nav.id = 'slideController';
+      nav.className = 'slide-controller';
+      nav.setAttribute('aria-label', 'Deep research world navigation');
+      document.body.appendChild(nav);
+    }
+
+    nav.innerHTML = `
+      <button class="snav-btn" id="snavPrev" aria-label="Previous world" title="Previous world (Arrow Left / Up)">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6"/></svg>
+        <span>Prev</span>
+      </button>
+      <div class="snav-dots" id="snavDots">
+        ${worlds.map((w, i) => {
+          const title = w.querySelector('.w-name')?.textContent?.replace(/\\s+/g, ' ').trim() || `World ${i + 1}`;
+          return `<button class="snav-dot" data-idx="${i}" aria-label="World ${i + 1}: ${title}" title="${title}"></button>`;
+        }).join('')}
+      </div>
+      <div class="snav-count" id="snavCount">
+        <span class="cur">01</span><span class="total"> / 0${total}</span>
+      </div>
+      <button class="snav-btn" id="snavNext" aria-label="Next world" title="Next world (Arrow Right / Down)">
+        <span>Next</span>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    `;
+
+    function updateUI() {
+      const curSpan = nav.querySelector('#snavCount .cur');
+      if (curSpan) curSpan.textContent = String(currentIdx + 1).padStart(2, '0');
+
+      const dots = nav.querySelectorAll('#snavDots .snav-dot');
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentIdx);
+        dot.setAttribute('aria-current', i === currentIdx ? 'true' : 'false');
+      });
+
+      const prevBtn = nav.querySelector('#snavPrev');
+      const nextBtn = nav.querySelector('#snavNext');
+      if (prevBtn) prevBtn.disabled = currentIdx === 0;
+      if (nextBtn) nextBtn.disabled = currentIdx === total - 1;
+    }
+
+    nav.querySelector('#snavPrev')?.addEventListener('click', () => { if (currentIdx > 0) goToSlide(currentIdx - 1); });
+    nav.querySelector('#snavNext')?.addEventListener('click', () => { if (currentIdx < total - 1) goToSlide(currentIdx + 1); });
+    nav.querySelectorAll('#snavDots .snav-dot').forEach(btn => {
+      btn.addEventListener('click', () => goToSlide(Number(btn.dataset.idx)));
+    });
+
+    let scrollTicking = false;
+    window.addEventListener('scroll', () => {
+      if (scrollTicking || isNavigating) return;
+      scrollTicking = true;
+      requestAnimationFrame(() => {
+        scrollTicking = false;
+        const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 64;
+        let active = 0;
+        for (let i = 0; i < total; i++) {
+          const w = worlds[i];
+          const r = w.getBoundingClientRect();
+          if (r.top <= navH + 80 && r.bottom > navH + 80) {
+            active = i;
+            break;
+          }
+        }
+        if (active !== currentIdx) {
+          currentIdx = active;
+          updateUI();
+        }
+      });
+    }, { passive: true });
+
+    if (!window.__slideKeyAttached) {
+      window.__slideKeyAttached = true;
+      window.addEventListener('keydown', e => {
+        const tag = (e.target.tagName || '').toUpperCase();
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
+        if (['ArrowDown', 'ArrowRight', 'PageDown'].includes(e.key)) {
+          if (typeof window.nextSlide === 'function') {
+            e.preventDefault();
+            window.nextSlide();
+          }
+        } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
+          if (typeof window.prevSlide === 'function') {
+            e.preventDefault();
+            window.prevSlide();
+          }
+        }
+      });
+    }
+
+    window.goToSlide = goToSlide;
+    window.nextSlide = () => goToSlide(currentIdx + 1);
+    window.prevSlide = () => goToSlide(currentIdx - 1);
+
+    updateUI();
+  }
+
+  function syncSection(data) {
+    if (!data || !data.sections || !data.sections[SECTION_KEY]) return;
+    const sec = data.sections[SECTION_KEY];
+    if (sec.title) {
+      const h1 = document.querySelector('h1');
+      if (h1) h1.textContent = sec.title;
+      document.title = sec.title + ' — Er. Hitakankshi Behera';
+    }
+    if (sec.subtitle) {
+      const desc = document.querySelector('.intro p');
+      if (desc) desc.textContent = sec.subtitle;
+    }
+  }
+
+  // Initial load sync
+  try {
+    if (typeof window.getSiteData === 'function') {
+      syncSection(window.getSiteData());
+    } else if (typeof DEFAULT_SITE_DATA !== 'undefined') {
+      syncSection(DEFAULT_SITE_DATA);
+    }
+  } catch (e) {
+    console.warn('[RealtimeSync] Initial sync skipped:', e);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSlideController);
+  } else {
+    initSlideController();
+  }
+
+  try {
+    if (typeof BroadcastChannel !== 'undefined') {
+      const bc = new BroadcastChannel('portfolio_realtime_sync');
+      bc.onmessage = function(evt) {
+        if (evt.data && evt.data.type === 'SITE_DATA_UPDATED' && evt.data.data) {
+          syncSection(evt.data.data);
+        }
+      };
+    }
+  } catch (_) {}
+
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'PORTFOLIO_SITE_DATA' && e.newValue) {
+      try { syncSection(JSON.parse(e.newValue)); } catch (_) {}
+    }
+  });
+
+  window.addEventListener('siteDataUpdated', function(e) {
+    syncSection(e.detail);
+  });
+})();
+</script>
+
 </body>
 </html>
 
